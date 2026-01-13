@@ -124,64 +124,6 @@ class EasySocketClient:
         if self.tcp_client_socket:
             self.tcp_client_socket.close()
 
-class EasySocketPeer:
-    def __init__(self, your_ip: str = "localhost", ip_to_connect_to: str = "localhost", rendezvous_port: int = 50505, on_receive: typing.Optional[typing.Callable[[str, typing.Optional[bytes]], None]] = None):
-        self.rendezvous_port = rendezvous_port
-        self.hosting_ip = your_ip
-        self.peers_ip = ip_to_connect_to
-        self.os_given_port = None
-        self.peer_running_server = False
-        self.peer_given_port = None
-        self.message_function = on_receive
-
-        self._start_client_on_rendezvous()
-
-    def _start_client_on_rendezvous(self):
-        def message_received(m):
-            if m.startswith("Hosting server on port:"):
-                self.peer_running_server = True
-                self.peer_given_port = int(m.split(":")[1])
-                client.close()
-                self._connect_to_peer_server()
-                print("connecting to peer server")
-
-        client = EasySocketClient(self.peers_ip, self.rendezvous_port, on_receive=self.message_function)
-        client.start()
-        if not client._running and not self.peer_running_server:
-            print("starting server on os port")
-            self._start_server_on_unknown_port()
-
-    def _connect_to_peer_server(self):
-        def message_received(m):
-            print(m)
-
-        client = EasySocketClient(self.peers_ip, self.peer_given_port, on_receive=self.message_function)
-        client.start()
-        print(f"connected to peer server at port {self.peer_given_port}")
-        client.send("hello from client")
-
-    def _start_server_on_unknown_port(self):
-        def message_received(m):
-            print(m)
-
-        server = EasySocketServer(self.hosting_ip, 0, self.message_function)
-        server.start()
-        self.os_given_port = server.port
-
-        self._host_server_on_rendezvous()
-
-    def _host_server_on_rendezvous(self):
-        def message_received(m):
-            print(m)
-
-        server = EasySocketServer(self.hosting_ip, 50505, self.message_function)
-        server.start()
-
-        while True:
-            if server.conn:
-                server.send(f"Hosting server on port:{self.os_given_port}")
-                break
-
 class EasySocketPeerWithUDPBroadcasting:
     def __init__(self, your_id: str = "Guest", peers_id: str = "Guest1", on_receive: typing.Callable[[str], None] = None, rendezvous_port: int = 50505):
         self.user_id = your_id
