@@ -10,7 +10,7 @@ class EasySocketServer:
         self.port = port
         self.conn = None
         self._running = True
-        self.f = Fernet('NOhECiq0Hnyo1-o5omiM5uvjbnqc0k6ZjcaO-Y_b_7U=')
+        self.f = Fernet('key')
         self.ipv4_or_6 = ipv4_or_6
 
     def start(self):
@@ -73,7 +73,7 @@ class EasySocketClient:
         self.ip = host_ip
         self.port = port
         self._running = True
-        self.f = Fernet('NOhECiq0Hnyo1-o5omiM5uvjbnqc0k6ZjcaO-Y_b_7U=')
+        self.f = Fernet('key')
         self.ipv4_or_6 = ipv4_or_6
 
     def start(self):
